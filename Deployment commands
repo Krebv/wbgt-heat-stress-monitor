@@ -1,0 +1,8 @@
+# First push to GitHub
+git add .
+git commit -m "Initial WBGT Heat Stress Monitor"
+git remote add origin https://github.com/yourusername/wbgt-heat-stress-monitor.git
+git push -u origin main
+
+# Deploy to GitHub Pages
+npm run deploy
