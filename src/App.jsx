@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
-import WBGTMonitor from './components/WBGTMonitor';
+import { useWBGTData } from './hooks/useWBGTData';
+import LiveWBGTDisplay from './components/LiveWBGTDisplay';
+import StationSelector from './components/StationSelector';
 import RiskDisplay from './components/RiskDisplay';
 import MeasuresPanel from './components/MeasuresPanel';
 import AlertBanner from './components/AlertBanner';
+import { CircularProgress, Alert } from '@mui/material';
 
 const darkTheme = createTheme({
   palette: {
@@ -24,29 +27,58 @@ const darkTheme = createTheme({
 });
 
 function App() {
-  const [currentWBGT, setCurrentWBGT] = useState(29.5);
-  const [riskLevel, setRiskLevel] = useState('low');
+  const { data, loading, error, refetch, setSelectedStation } = useWBGTData();
 
-  const updateWBGT = (value) => {
-    setCurrentWBGT(value);
-    if (value < 31) setRiskLevel('low');
-    else if (value < 32) setRiskLevel('medium');
-    else if (value < 33) setRiskLevel('high-medium');
-    else setRiskLevel('high');
+  const getRiskLevel = (wbgt) => {
+    if (wbgt < 31) return 'low';
+    if (wbgt < 32) return 'medium';
+    if (wbgt < 33) return 'high-medium';
+    return 'high';
   };
+
+  if (loading) {
+    return (
+      <ThemeProvider theme={darkTheme}>
+        <CssBaseline />
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+          <CircularProgress />
+        </Box>
+      </ThemeProvider>
+    );
+  }
+
+  const riskLevel = data ? getRiskLevel(data.wbgt) : 'low';
 
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
       <Container maxWidth="md" sx={{ py: 4 }}>
-        <AlertBanner riskLevel={riskLevel} wbgt={currentWBGT} />
+        {error && (
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            Using simulated data - {error}
+          </Alert>
+        )}
         
-        <WBGTMonitor 
-          currentValue={currentWBGT} 
-          onUpdate={updateWBGT} 
+        {data?.simulated && (
+          <Alert severity="info" sx={{ mb: 2 }}>
+            Demo Mode: Using estimated WBGT values
+          </Alert>
+        )}
+        
+        <AlertBanner riskLevel={riskLevel} wbgt={data?.wbgt || 29} />
+        
+        <StationSelector 
+          stations={data?.allStations || []}
+          selected={data?.station?.id}
+          onSelect={setSelectedStation}
         />
         
-        <RiskDisplay level={riskLevel} value={currentWBGT} />
+        <LiveWBGTDisplay 
+          data={data}
+          onRefresh={refetch}
+        />
+        
+        <RiskDisplay level={riskLevel} value={data?.wbgt || 29} />
         
         <MeasuresPanel riskLevel={riskLevel} />
       </Container>
