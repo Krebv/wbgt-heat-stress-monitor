@@ -1,0 +1,11 @@
+# Install gh-pages
+npm install --save-dev gh-pages
+
+# Add to package.json:
+# "homepage": "https://yourusername.github.io/wbgt-heat-stress-monitor",
+# "scripts": {
+#   "predeploy": "npm run build",
+#   "deploy": "gh-pages -d dist"
+# }
+
+# Configure vite.config.js for GitHub Pages
