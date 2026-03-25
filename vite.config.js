@@ -3,5 +3,5 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/wbgt-heat-stress-monitor/',
+  base: '/wbgt-heat-stress-monitor/',  // Your repo name with slashes
 })
