@@ -259,7 +259,7 @@ export default function MeasuresPanel({ riskLevel }) {
                         </ListItemIcon>
                         <ListItemText 
                           primary={req}
-                          primaryTypographyProps={{ color: 'error.light' }}
+                          primaryTypographyProps={{ color: 'white' }}
                         />
                       </ListItem>
                     ))}
