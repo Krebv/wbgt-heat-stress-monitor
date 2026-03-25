@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 // Fallback stations with Woodlands (used if API fails)
 const FALLBACK_STATIONS = [
   { id: 'S124', name: 'Upper Changi Road North', location: 'Changi Meteorological Station', wbgt: 26.8, heatStress: 'Low' },
-  { id: 'S125', name: 'Woodlands Street 13', location: 'Woodlands Stadium', wbgt: 27.2, heatStress: 'Low' }, // WOODLANDS
+  { id: 'S125', name: 'Woodlands Street 13', location: 'Woodlands Stadium', wbgt: 27.2, heatStress: 'Low' },
   { id: 'S126', name: 'Old Chua Chu Kang Road', location: 'Old Choa Chu Kang Road', wbgt: 27.9, heatStress: 'Low' },
   { id: 'S127', name: 'Stadium Road', location: 'Kallang Practice Track', wbgt: 26.6, heatStress: 'Low' },
   { id: 'S128', name: 'Bishan Street', location: 'Bishan Stadium', wbgt: 26.4, heatStress: 'Low' },
@@ -28,16 +28,14 @@ export function useWBGTData() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedStation, setSelectedStation] = useState('S125'); // Default to Woodlands
+  const [selectedStation, setSelectedStation] = useState('S125');
   const [allStations, setAllStations] = useState(FALLBACK_STATIONS);
-  const [manualWBGT, setManualWBGT] = useState(null);
   const [usingLiveData, setUsingLiveData] = useState(false);
 
   const fetchWBGT = async () => {
     try {
       setLoading(true);
       
-      // Try to fetch live data from NEA API
       const response = await fetch(
         'https://api-open.data.gov.sg/v2/real-time/api/weather?api=wbgt',
         { 
@@ -57,22 +55,18 @@ export function useWBGTData() {
       const readings = result.data.records[0].item.readings;
       const timestamp = result.data.records[0].updatedTimestamp;
       
-      // Transform API data to our format
       const stations = readings.map(r => ({
         id: r.station.id,
         name: r.station.name,
         location: r.station.townCenter,
         wbgt: parseFloat(r.wbgt),
-        heatStress: r.heatStress,
-        latitude: r.location.latitude,
-        longitude: r.location.longitude
+        heatStress: r.heatStress
       }));
       
       setAllStations(stations);
       setUsingLiveData(true);
       setError(null);
       
-      // Find selected station or default to first
       const station = stations.find(s => s.id === selectedStation) || stations[0];
       
       setData({
@@ -85,7 +79,6 @@ export function useWBGTData() {
       });
       
     } catch (err) {
-      // Fallback to simulated data
       console.error('Live API failed:', err);
       setUsingLiveData(false);
       setError('Using cached data - Live API unavailable');
@@ -106,15 +99,11 @@ export function useWBGTData() {
 
   useEffect(() => {
     fetchWBGT();
-    
-    // Auto-refresh every 15 minutes (NEA updates every 15 mins)
     const interval = setInterval(fetchWBGT, 15 * 60 * 1000);
     return () => clearInterval(interval);
   }, [selectedStation]);
 
-  // Manual override
   const setManualValue = (value) => {
-    setManualWBGT(value);
     if (data) {
       setData({
         ...data,
@@ -132,7 +121,6 @@ export function useWBGTData() {
     usingLiveData,
     setSelectedStation, 
     setManualValue,
-    manualWBGT,
     refetch: fetchWBGT
   };
 }
