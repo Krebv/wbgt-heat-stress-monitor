@@ -1,81 +1,126 @@
 import { useState, useEffect } from 'react';
 
-const STATIONS = [
-  { id: 'S24', name: 'Upper Changi', location: 'Upper Changi Road North', temp: 31.2, humidity: 78 },
-  { id: 'S43', name: 'Kim Chuan', location: 'Kim Chuan Road', temp: 30.5, humidity: 76 },
-  { id: 'S44', name: 'Nanyang', location: 'Nanyang Avenue', temp: 30.8, humidity: 75 },
-  { id: 'S50', name: 'Clementi', location: 'Clementi Road', temp: 31.5, humidity: 80 },
-  { id: 'S60', name: 'Sentosa', location: 'Sentosa', temp: 29.9, humidity: 82 },
-  { id: 'S100', name: 'Woodlands Road', location: 'Woodlands Road', temp: 30.5, humidity: 77 },
-  { id: 'S104', name: 'Woodlands Avenue 9', location: 'Woodlands Avenue 9', temp: 30.2, humidity: 79 },
-  { id: 'S106', name: 'Pulau Ubin', location: 'Pulau Ubin', temp: 30.0, humidity: 81 },
-  { id: 'S107', name: 'East Coast', location: 'East Coast Parkway', temp: 30.5, humidity: 79 },
-  { id: 'S109', name: 'Ang Mo Kio', location: 'Ang Mo Kio Avenue 5', temp: 30.8, humidity: 76 },
-  { id: 'S111', name: 'Scotts Road', location: 'Scotts Road', temp: 32.1, humidity: 74 },
-  { id: 'S115', name: 'Tuas South', location: 'Tuas South Avenue 3', temp: 31.8, humidity: 76 },
-  { id: 'S116', name: 'West Coast', location: 'West Coast Highway', temp: 30.2, humidity: 81 },
-  { id: 'S117', name: 'Banyan Road', location: 'Banyan Road', temp: 30.8, humidity: 75 }
+// Fallback stations with Woodlands (used if API fails)
+const FALLBACK_STATIONS = [
+  { id: 'S124', name: 'Upper Changi Road North', location: 'Changi Meteorological Station', wbgt: 26.8, heatStress: 'Low' },
+  { id: 'S125', name: 'Woodlands Street 13', location: 'Woodlands Stadium', wbgt: 27.2, heatStress: 'Low' }, // WOODLANDS
+  { id: 'S126', name: 'Old Chua Chu Kang Road', location: 'Old Choa Chu Kang Road', wbgt: 27.9, heatStress: 'Low' },
+  { id: 'S127', name: 'Stadium Road', location: 'Kallang Practice Track', wbgt: 26.6, heatStress: 'Low' },
+  { id: 'S128', name: 'Bishan Street', location: 'Bishan Stadium', wbgt: 26.4, heatStress: 'Low' },
+  { id: 'S129', name: 'Bedok North Street 2', location: 'Bedok Stadium', wbgt: 26.6, heatStress: 'Low' },
+  { id: 'S130', name: 'West Coast Road', location: 'Clementi Stadium', wbgt: 27.7, heatStress: 'Low' },
+  { id: 'S132', name: 'Jurong West Street 93', location: 'Jurong West Stadium', wbgt: 28.3, heatStress: 'Low' },
+  { id: 'S137', name: 'Sakra Road', location: 'Sakra Road (Jurong Island)', wbgt: 28.6, heatStress: 'Low' },
+  { id: 'S139', name: 'Tuas Terminal Gateway', location: 'Tuas Terminal Gateway', wbgt: 27.1, heatStress: 'Low' },
+  { id: 'S140', name: 'Choa Chu Kang Stadium', location: 'Choa Chu Kang Stadium', wbgt: 27.5, heatStress: 'Low' },
+  { id: 'S141', name: 'Yio Chu Kang Stadium', location: 'Yio Chu Kang Stadium', wbgt: 27.0, heatStress: 'Low' },
+  { id: 'S142', name: 'Sentosa Palawan Green', location: 'Palawan Green (Sentosa)', wbgt: 27.5, heatStress: 'Low' },
+  { id: 'S143', name: 'Punggol North', location: 'Punggol North', wbgt: 26.3, heatStress: 'Low' },
+  { id: 'S144', name: 'Upper Pickering Street', location: 'Hong Lim Park', wbgt: 26.2, heatStress: 'Low' },
+  { id: 'S149', name: 'Tampines Walk', location: 'Tampines Central Park', wbgt: 26.3, heatStress: 'Low' },
+  { id: 'S150', name: 'Evans Road', location: 'MOE (Evans) Stadium', wbgt: 26.5, heatStress: 'Low' },
+  { id: 'S153', name: 'Bukit Batok Street 22', location: 'Bukit Batok Swimming Complex', wbgt: 27.4, heatStress: 'Low' },
+  { id: 'S184', name: 'Sengkang East Avenue', location: 'Sengkang East Avenue', wbgt: 27.4, heatStress: 'Low' },
+  { id: 'S187', name: 'Bukit Timah (West)', location: 'Coronation Road', wbgt: 26.2, heatStress: 'Low' }
 ];
-
-// Calculate WBGT from temperature and humidity
-const calculateWBGT = (temp, humidity) => {
-  // Simplified formula for estimation
-  const twb = temp * Math.atan(0.151977 * Math.sqrt(humidity + 8.313659)) + 
-              Math.atan(temp + humidity) - 
-              Math.atan(humidity - 1.676331) + 
-              0.00391838 * Math.pow(humidity, 1.5) * Math.atan(0.023101 * humidity) - 
-              4.686035;
-  const tg = temp + 2; // Globe temp estimate
-  return (0.7 * twb) + (0.2 * tg) + (0.1 * temp);
-};
 
 export function useWBGTData() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedStation, setSelectedStation] = useState('S104'); // Default to Woodlands Avenue 9
+  const [selectedStation, setSelectedStation] = useState('S125'); // Default to Woodlands
+  const [allStations, setAllStations] = useState(FALLBACK_STATIONS);
   const [manualWBGT, setManualWBGT] = useState(null);
+  const [usingLiveData, setUsingLiveData] = useState(false);
 
-  useEffect(() => {
-    // Simulate API fetch with realistic data
-    const fetchData = () => {
+  const fetchWBGT = async () => {
+    try {
       setLoading(true);
       
-      // Simulate network delay
-      setTimeout(() => {
-        const station = STATIONS.find(s => s.id === selectedStation) || STATIONS[0];
-        const wbgt = calculateWBGT(station.temp, station.humidity);
-        
-        setData({
-          station: station,
-          temperature: station.temp,
-          humidity: station.humidity,
-          wbgt: Math.round(wbgt * 10) / 10,
-          timestamp: new Date().toISOString(),
-          allStations: STATIONS,
-          simulated: true
-        });
-        
-        setError('Using simulated data - API access restricted from GitHub Pages');
-        setLoading(false);
-      }, 500);
-    };
+      // Try to fetch live data from NEA API
+      const response = await fetch(
+        'https://api-open.data.gov.sg/v2/real-time/api/weather?api=wbgt',
+        { 
+          method: 'GET',
+          headers: { 'Accept': 'application/json' }
+        }
+      );
+      
+      if (!response.ok) throw new Error('API request failed');
+      
+      const result = await response.json();
+      
+      if (result.code !== 0 || !result.data?.records?.[0]?.item?.readings) {
+        throw new Error('Invalid API response');
+      }
+      
+      const readings = result.data.records[0].item.readings;
+      const timestamp = result.data.records[0].updatedTimestamp;
+      
+      // Transform API data to our format
+      const stations = readings.map(r => ({
+        id: r.station.id,
+        name: r.station.name,
+        location: r.station.townCenter,
+        wbgt: parseFloat(r.wbgt),
+        heatStress: r.heatStress,
+        latitude: r.location.latitude,
+        longitude: r.location.longitude
+      }));
+      
+      setAllStations(stations);
+      setUsingLiveData(true);
+      setError(null);
+      
+      // Find selected station or default to first
+      const station = stations.find(s => s.id === selectedStation) || stations[0];
+      
+      setData({
+        station: station,
+        wbgt: station.wbgt,
+        heatStress: station.heatStress,
+        timestamp: timestamp,
+        allStations: stations,
+        live: true
+      });
+      
+    } catch (err) {
+      // Fallback to simulated data
+      console.error('Live API failed:', err);
+      setUsingLiveData(false);
+      setError('Using cached data - Live API unavailable');
+      
+      const station = FALLBACK_STATIONS.find(s => s.id === selectedStation) || FALLBACK_STATIONS[0];
+      setData({
+        station: station,
+        wbgt: station.wbgt,
+        heatStress: station.heatStress,
+        timestamp: new Date().toISOString(),
+        allStations: FALLBACK_STATIONS,
+        live: false
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchData();
+  useEffect(() => {
+    fetchWBGT();
     
-    // Update every 15 minutes
-    const interval = setInterval(fetchData, 15 * 60 * 1000);
+    // Auto-refresh every 15 minutes (NEA updates every 15 mins)
+    const interval = setInterval(fetchWBGT, 15 * 60 * 1000);
     return () => clearInterval(interval);
   }, [selectedStation]);
 
-  // Allow manual WBGT override
+  // Manual override
   const setManualValue = (value) => {
     setManualWBGT(value);
     if (data) {
       setData({
         ...data,
         wbgt: value,
-        manual: true
+        manual: true,
+        heatStress: value < 31 ? 'Low' : value < 32 ? 'Medium' : value < 33 ? 'High' : 'Critical'
       });
     }
   };
@@ -84,8 +129,10 @@ export function useWBGTData() {
     data, 
     loading, 
     error, 
+    usingLiveData,
     setSelectedStation, 
     setManualValue,
-    manualWBGT 
+    manualWBGT,
+    refetch: fetchWBGT
   };
 }
