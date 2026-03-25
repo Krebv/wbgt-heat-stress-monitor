@@ -27,7 +27,7 @@ const darkTheme = createTheme({
 });
 
 function App() {
-  const { data, loading, error, refetch, setSelectedStation } = useWBGTData();
+  const { data, loading, error, refetch, setSelectedStation, setManualValue } = useWBGTData();
 
   const getRiskLevel = (wbgt) => {
     if (wbgt < 31) return 'low';
@@ -55,13 +55,7 @@ function App() {
       <Container maxWidth="md" sx={{ py: 4 }}>
         {error && (
           <Alert severity="warning" sx={{ mb: 2 }}>
-            Using simulated data - {error}
-          </Alert>
-        )}
-        
-        {data?.simulated && (
-          <Alert severity="info" sx={{ mb: 2 }}>
-            Demo Mode: Using estimated WBGT values
+            {error}
           </Alert>
         )}
         
@@ -76,6 +70,7 @@ function App() {
         <LiveWBGTDisplay 
           data={data}
           onRefresh={refetch}
+          onManualSet={setManualValue}
         />
         
         <RiskDisplay level={riskLevel} value={data?.wbgt || 29} />
