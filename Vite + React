@@ -1,0 +1,13 @@
+# Install Vite with React template
+npm create vite@latest . -- --template react
+
+# Install dependencies
+npm install
+
+# Install additional packages for UI and functionality
+npm install @mui/material @emotion/react @emotion/styled
+npm install @mui/icons-material
+npm install recharts  # For temperature trend charts
+npm install date-fns  # For time formatting
+
+npm run dev
