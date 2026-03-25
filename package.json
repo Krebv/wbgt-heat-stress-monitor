@@ -1,5 +1,6 @@
 {
   "name": "wbgt-heat-stress-monitor",
+  "version": "1.0.0",
   "homepage": "https://yourusername.github.io/wbgt-heat-stress-monitor",
   "scripts": {
     "dev": "vite",
