@@ -4,7 +4,7 @@ import {
   ListItemIcon, ListItemText, Chip, Box, Divider, 
   Accordion, AccordionSummary, AccordionDetails 
 } from '@mui/material';
-import { 
+import { f
   ExpandMore, CheckCircle, Warning, LocalDrink, 
   AccessTime, WbSunny, People, AcUnit, Schedule 
 } from '@mui/icons-material';
@@ -217,7 +217,7 @@ export default function MeasuresPanel({ riskLevel }) {
   return (
     <Card>
       <CardContent>
-        <Typography variant="h5" gutterBottom sx={{ color: data.color }}>
+        <Typography variant="h5" gutterBottom sx={{ color: '#ffffff' }}>
           Required Safety Measures
         </Typography>
         
