@@ -1,2 +1,2 @@
 
-WBGT Heat Stress Monitor.
+WBGT Heat Stress Monitor. 
