@@ -47,4 +47,153 @@ export default function LiveWBGTDisplay({ data, onRefresh, onManualSet }) {
             <Thermostat sx={{ color: wbgtColor }} /> Live WBGT Monitor
           </Typography>
           <Box>
-            
+            <Tooltip title="Manual Input">
+              <IconButton onClick={() => setEditMode(!editMode)} color={editMode ? "primary" : "default"}>
+                <Edit />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Refresh Data">
+              <IconButton onClick={onRefresh} color="primary">
+                <Refresh />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </Box>
+
+        {editMode ? (
+          <Box sx={{ mb: 3, p: 2, bgcolor: 'background.paper', borderRadius: 1 }}>
+            <Typography variant="h6" gutterBottom>Manual WBGT Input</Typography>
+            <Slider
+              value={manualValue}
+              onChange={(e, val) => setManualValue(val)}
+              min={25}
+              max={38}
+              step={0.1}
+              marks={[
+                { value: 31, label: '31°C' },
+                { value: 32, label: '32°C' },
+                { value: 33, label: '33°C' },
+              ]}
+              sx={{ mb: 2 }}
+            />
+            <Box display="flex" gap={2}>
+              <TextField
+                type="number"
+                value={manualValue}
+                onChange={(e) => setManualValue(parseFloat(e.target.value))}
+                label="WBGT Value"
+                sx={{ flex: 1 }}
+              />
+              <Button variant="contained" onClick={handleManualSet} sx={{ mt: 1 }}>
+                Set Value
+              </Button>
+            </Box>
+          </Box>
+        ) : (
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <Box sx={{ textAlign: 'center', py: 2 }}>
+                <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
+                  WBGT (Heat Stress Index)
+                </Typography>
+                <Typography 
+                  variant="h1" 
+                  sx={{ 
+                    color: wbgtColor,
+                    fontWeight: 'bold',
+                    fontSize: '5rem',
+                    textShadow: `0 0 30px ${wbgtColor}80`
+                  }}
+                >
+                  {data.wbgt.toFixed(1)}°C
+                </Typography>
+                
+                <Chip 
+                  label={getRiskLabel(data.wbgt)}
+                  sx={{ 
+                    backgroundColor: wbgtColor,
+                    color: '#fff',
+                    fontWeight: 'bold',
+                    fontSize: '1.2rem',
+                    py: 2,
+                    px: 1,
+                    mt: 1
+                  }}
+                />
+                
+                {data.manual && (
+                  <Chip label="MANUAL INPUT" color="warning" size="small" sx={{ mt: 1, ml: 1 }} />
+                )}
+                
+                {data.live && (
+                  <Chip label="LIVE DATA" color="success" size="small" sx={{ mt: 1, ml: 1 }} />
+                )}
+              </Box>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 1 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    Air Temperature
+                  </Typography>
+                  <Typography variant="h4" sx={{ color: '#4fc3f7' }}>
+                    {data.temperature ? `${data.temperature.toFixed(1)}°C` : 'N/A'}
+                  </Typography>
+                </Box>
+
+                <Box display="flex" alignItems="center" gap={1}>
+                  <LocationOn color="primary" />
+                  <Typography variant="h6">
+                    {data.station.name}
+                  </Typography>
+                </Box>
+                
+                <Typography variant="body2" color="text.secondary">
+                  {data.station.location}
+                </Typography>
+
+                <Box display="flex" alignItems="center" gap={1}>
+                  <AccessTime fontSize="small" color="action" />
+                  <Typography variant="caption" color="text.secondary">
+                    Updated: {updateTime} (Auto-refreshes every 15 min)
+                  </Typography>
+                </Box>
+
+                {data.heatStress && (
+                  <Chip 
+                    label={`Heat Stress: ${data.heatStress}`}
+                    color={data.heatStress === 'Low' ? 'success' : data.heatStress === 'Medium' ? 'warning' : 'error'}
+                    variant="outlined"
+                    size="small"
+                  />
+                )}
+
+                {data.wbgt >= 32 && (
+                  <Box sx={{ p: 1, bgcolor: 'error.main', color: 'error.contrastText', borderRadius: 1 }}>
+                    <Warning fontSize="small" sx={{ mr: 1 }} />
+                    Mandatory rest breaks required for heavy physical work
+                  </Box>
+                )}
+              </Box>
+            </Grid>
+          </Grid>
+        )}
+
+        <LinearProgress 
+          variant="determinate" 
+          value={Math.min((data.wbgt / 38) * 100, 100)}
+          sx={{ 
+            mt: 3,
+            height: 8,
+            borderRadius: 4,
+            backgroundColor: `${wbgtColor}30`,
+            '& .MuiLinearProgress-bar': {
+              backgroundColor: wbgtColor,
+            }
+          }}
+        />
+      </CardContent>
+    </Card>
+  );
+}
