@@ -4,7 +4,7 @@ import {
   IconButton, Tooltip, Grid, LinearProgress, 
   TextField, Button, Slider 
 } from '@mui/material';
-import { Refresh, Thermostat, AccessTime, LocationOn, Warning, Edit } from '@mui/icons-material';
+import { Refresh, Thermostat, Opacity, AccessTime, LocationOn, Warning, Edit } from '@mui/icons-material';
 
 export default function LiveWBGTDisplay({ data, onRefresh, onManualSet }) {
   const [editMode, setEditMode] = useState(false);
@@ -26,7 +26,7 @@ export default function LiveWBGTDisplay({ data, onRefresh, onManualSet }) {
     return 'CRITICAL RISK';
   };
 
-  const color = getWBGTColor(data.wbgt);
+  const wbgtColor = getWBGTColor(data.wbgt);
   const updateTime = new Date(data.timestamp).toLocaleTimeString('en-SG');
 
   const handleManualSet = () => {
@@ -37,14 +37,14 @@ export default function LiveWBGTDisplay({ data, onRefresh, onManualSet }) {
   return (
     <Card sx={{ 
       mb: 3, 
-      background: `linear-gradient(135deg, ${color}20 0%, #1e293b 100%)`,
-      border: `2px solid ${color}`,
-      boxShadow: `0 0 20px ${color}40`
+      background: `linear-gradient(135deg, ${wbgtColor}20 0%, #1e293b 100%)`,
+      border: `2px solid ${wbgtColor}`,
+      boxShadow: `0 0 20px ${wbgtColor}40`
     }}>
       <CardContent>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
           <Typography variant="h5" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Thermostat sx={{ color }} /> Live WBGT Monitor
+            <Thermostat sx={{ color: wbgtColor }} /> Live WBGT Monitor
           </Typography>
           <Box>
             <Tooltip title="Manual Input">
@@ -91,15 +91,19 @@ export default function LiveWBGTDisplay({ data, onRefresh, onManualSet }) {
           </Box>
         ) : (
           <Grid container spacing={3}>
+            {/* MAIN FOCUS: WBGT - Large Display */}
             <Grid item xs={12} md={6}>
               <Box sx={{ textAlign: 'center', py: 2 }}>
+                <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
+                  WBGT (Heat Stress Index)
+                </Typography>
                 <Typography 
                   variant="h1" 
                   sx={{ 
-                    color,
+                    color: wbgtColor,
                     fontWeight: 'bold',
                     fontSize: '5rem',
-                    textShadow: `0 0 30px ${color}80`
+                    textShadow: `0 0 30px ${wbgtColor}80`
                   }}
                 >
                   {data.wbgt.toFixed(1)}°C
@@ -108,7 +112,7 @@ export default function LiveWBGTDisplay({ data, onRefresh, onManualSet }) {
                 <Chip 
                   label={getRiskLabel(data.wbgt)}
                   sx={{ 
-                    backgroundColor: color,
+                    backgroundColor: wbgtColor,
                     color: '#fff',
                     fontWeight: 'bold',
                     fontSize: '1.2rem',
@@ -128,8 +132,19 @@ export default function LiveWBGTDisplay({ data, onRefresh, onManualSet }) {
               </Box>
             </Grid>
 
+            {/* SECONDARY: Air Temperature & Details */}
             <Grid item xs={12} md={6}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {/* Air Temperature - Secondary Display */}
+                <Box sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 1 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    Air Temperature
+                  </Typography>
+                  <Typography variant="h4" sx={{ color: '#4fc3f7' }}>
+                    {data.temperature ? `${data.temperature.toFixed(1)}°C` : 'N/A'}
+                  </Typography>
+                </Box>
+
                 <Box display="flex" alignItems="center" gap={1}>
                   <LocationOn color="primary" />
                   <Typography variant="h6">
@@ -175,9 +190,9 @@ export default function LiveWBGTDisplay({ data, onRefresh, onManualSet }) {
             mt: 3,
             height: 8,
             borderRadius: 4,
-            backgroundColor: `${color}30`,
+            backgroundColor: `${wbgtColor}30`,
             '& .MuiLinearProgress-bar': {
-              backgroundColor: color,
+              backgroundColor: wbgtColor,
             }
           }}
         />
