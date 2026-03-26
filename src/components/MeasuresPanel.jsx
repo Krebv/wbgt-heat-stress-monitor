@@ -1,12 +1,12 @@
 import React from 'react';
-import { 
-  Card, CardContent, Typography, List, ListItem, 
-  ListItemIcon, ListItemText, Chip, Box, Divider, 
-  Accordion, AccordionSummary, AccordionDetails 
+import {
+  Card, CardContent, Typography, List, ListItem,
+  ListItemIcon, ListItemText, Chip, Box, Divider,
+  Accordion, AccordionSummary, AccordionDetails
 } from '@mui/material';
-import { f
-  ExpandMore, CheckCircle, Warning, LocalDrink, 
-  AccessTime, WbSunny, People, AcUnit, Schedule 
+import {
+  ExpandMore, CheckCircle, Warning, LocalDrink,
+  AccessTime, WbSunny, People, AcUnit, Schedule
 } from '@mui/icons-material';
 
 const measuresData = {
@@ -46,7 +46,7 @@ const measuresData = {
       }
     ]
   },
-  
+
   medium: {
     color: '#ff9800',
     categories: [
@@ -98,7 +98,7 @@ const measuresData = {
       }
     ]
   },
-  
+
   'high-medium': {
     color: '#ff5722',
     categories: [
@@ -134,7 +134,7 @@ const measuresData = {
     ],
     additionalNote: 'Includes all Medium Risk measures'
   },
-  
+
   high: {
     color: '#f44336',
     categories: [
@@ -213,22 +213,22 @@ const measuresData = {
 
 export default function MeasuresPanel({ riskLevel }) {
   const data = measuresData[riskLevel] || measuresData.low;
-  
+
   return (
     <Card>
       <CardContent>
         <Typography variant="h5" gutterBottom sx={{ color: '#ffffff' }}>
           Required Safety Measures
         </Typography>
-        
+
         {data.additionalNote && (
-          <Chip 
-            label={data.additionalNote} 
-            color="warning" 
-            sx={{ mb: 2 }} 
+          <Chip
+            label={data.additionalNote}
+            color="warning"
+            sx={{ mb: 2 }}
           />
         )}
-        
+
         {data.categories.map((category, idx) => (
           <Accordion key={idx} defaultExpanded={category.requirements.length > 0}>
             <AccordionSummary expandIcon={<ExpandMore />}>
@@ -236,11 +236,11 @@ export default function MeasuresPanel({ riskLevel }) {
                 {category.icon}
                 <Typography variant="h6">{category.title}</Typography>
                 {category.requirements.length > 0 && (
-                  <Chip 
-                    size="small" 
-                    label="REQUIRED" 
-                    color="error" 
-                    sx={{ ml: 1 }} 
+                  <Chip
+                    size="small"
+                    label="REQUIRED"
+                    color="error"
+                    sx={{ ml: 1 }}
                   />
                 )}
               </Box>
@@ -257,7 +257,7 @@ export default function MeasuresPanel({ riskLevel }) {
                         <ListItemIcon>
                           <Warning color="error" fontSize="small" />
                         </ListItemIcon>
-                        <ListItemText 
+                        <ListItemText
                           primary={req}
                           primaryTypographyProps={{ color: 'white' }}
                         />
@@ -266,7 +266,7 @@ export default function MeasuresPanel({ riskLevel }) {
                   </List>
                 </>
               )}
-              
+
               {category.recommendations.length > 0 && (
                 <>
                   {category.requirements.length > 0 && <Divider sx={{ my: 1 }} />}
