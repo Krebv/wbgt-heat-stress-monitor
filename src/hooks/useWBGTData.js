@@ -1,27 +1,27 @@
 import { useState, useEffect } from 'react';
 
-// Fallback stations with Woodlands (used if API fails)
+// Fallback stations with both WBGT and air temperature data
 const FALLBACK_STATIONS = [
-  { id: 'S124', name: 'Upper Changi Road North', location: 'Changi Meteorological Station', wbgt: 26.8, heatStress: 'Low' },
-  { id: 'S125', name: 'Woodlands Street 13', location: 'Woodlands Stadium', wbgt: 27.2, heatStress: 'Low' },
-  { id: 'S126', name: 'Old Chua Chu Kang Road', location: 'Old Choa Chu Kang Road', wbgt: 27.9, heatStress: 'Low' },
-  { id: 'S127', name: 'Stadium Road', location: 'Kallang Practice Track', wbgt: 26.6, heatStress: 'Low' },
-  { id: 'S128', name: 'Bishan Street', location: 'Bishan Stadium', wbgt: 26.4, heatStress: 'Low' },
-  { id: 'S129', name: 'Bedok North Street 2', location: 'Bedok Stadium', wbgt: 26.6, heatStress: 'Low' },
-  { id: 'S130', name: 'West Coast Road', location: 'Clementi Stadium', wbgt: 27.7, heatStress: 'Low' },
-  { id: 'S132', name: 'Jurong West Street 93', location: 'Jurong West Stadium', wbgt: 28.3, heatStress: 'Low' },
-  { id: 'S137', name: 'Sakra Road', location: 'Sakra Road (Jurong Island)', wbgt: 28.6, heatStress: 'Low' },
-  { id: 'S139', name: 'Tuas Terminal Gateway', location: 'Tuas Terminal Gateway', wbgt: 27.1, heatStress: 'Low' },
-  { id: 'S140', name: 'Choa Chu Kang Stadium', location: 'Choa Chu Kang Stadium', wbgt: 27.5, heatStress: 'Low' },
-  { id: 'S141', name: 'Yio Chu Kang Stadium', location: 'Yio Chu Kang Stadium', wbgt: 27.0, heatStress: 'Low' },
-  { id: 'S142', name: 'Sentosa Palawan Green', location: 'Palawan Green (Sentosa)', wbgt: 27.5, heatStress: 'Low' },
-  { id: 'S143', name: 'Punggol North', location: 'Punggol North', wbgt: 26.3, heatStress: 'Low' },
-  { id: 'S144', name: 'Upper Pickering Street', location: 'Hong Lim Park', wbgt: 26.2, heatStress: 'Low' },
-  { id: 'S149', name: 'Tampines Walk', location: 'Tampines Central Park', wbgt: 26.3, heatStress: 'Low' },
-  { id: 'S150', name: 'Evans Road', location: 'MOE (Evans) Stadium', wbgt: 26.5, heatStress: 'Low' },
-  { id: 'S153', name: 'Bukit Batok Street 22', location: 'Bukit Batok Swimming Complex', wbgt: 27.4, heatStress: 'Low' },
-  { id: 'S184', name: 'Sengkang East Avenue', location: 'Sengkang East Avenue', wbgt: 27.4, heatStress: 'Low' },
-  { id: 'S187', name: 'Bukit Timah (West)', location: 'Coronation Road', wbgt: 26.2, heatStress: 'Low' }
+  { id: 'S124', name: 'Upper Changi Road North', location: 'Changi Meteorological Station', wbgt: 26.8, temperature: 28.5 },
+  { id: 'S125', name: 'Woodlands Street 13', location: 'Woodlands Stadium', wbgt: 27.2, temperature: 29.2 },
+  { id: 'S126', name: 'Old Chua Chu Kang Road', location: 'Old Choa Chu Kang Road', wbgt: 27.9, temperature: 29.8 },
+  { id: 'S127', name: 'Stadium Road', location: 'Kallang Practice Track', wbgt: 26.6, temperature: 28.3 },
+  { id: 'S128', name: 'Bishan Street', location: 'Bishan Stadium', wbgt: 26.4, temperature: 28.1 },
+  { id: 'S129', name: 'Bedok North Street 2', location: 'Bedok Stadium', wbgt: 26.6, temperature: 28.4 },
+  { id: 'S130', name: 'West Coast Road', location: 'Clementi Stadium', wbgt: 27.7, temperature: 29.5 },
+  { id: 'S132', name: 'Jurong West Street 93', location: 'Jurong West Stadium', wbgt: 28.3, temperature: 30.1 },
+  { id: 'S137', name: 'Sakra Road', location: 'Sakra Road (Jurong Island)', wbgt: 28.6, temperature: 30.4 },
+  { id: 'S139', name: 'Tuas Terminal Gateway', location: 'Tuas Terminal Gateway', wbgt: 27.1, temperature: 28.9 },
+  { id: 'S140', name: 'Choa Chu Kang Stadium', location: 'Choa Chu Kang Stadium', wbgt: 27.5, temperature: 29.3 },
+  { id: 'S141', name: 'Yio Chu Kang Stadium', location: 'Yio Chu Kang Stadium', wbgt: 27.0, temperature: 28.7 },
+  { id: 'S142', name: 'Sentosa Palawan Green', location: 'Palawan Green (Sentosa)', wbgt: 27.5, temperature: 29.2 },
+  { id: 'S143', name: 'Punggol North', location: 'Punggol North', wbgt: 26.3, temperature: 28.0 },
+  { id: 'S144', name: 'Upper Pickering Street', location: 'Hong Lim Park', wbgt: 26.2, temperature: 27.9 },
+  { id: 'S149', name: 'Tampines Walk', location: 'Tampines Central Park', wbgt: 26.3, temperature: 28.0 },
+  { id: 'S150', name: 'Evans Road', location: 'MOE (Evans) Stadium', wbgt: 26.5, temperature: 28.2 },
+  { id: 'S153', name: 'Bukit Batok Street 22', location: 'Bukit Batok Swimming Complex', wbgt: 27.4, temperature: 29.1 },
+  { id: 'S184', name: 'Sengkang East Avenue', location: 'Sengkang East Avenue', wbgt: 27.4, temperature: 29.1 },
+  { id: 'S187', name: 'Bukit Timah (West)', location: 'Coronation Road', wbgt: 26.2, temperature: 27.9 }
 ];
 
 export function useWBGTData() {
@@ -32,36 +32,49 @@ export function useWBGTData() {
   const [allStations, setAllStations] = useState(FALLBACK_STATIONS);
   const [usingLiveData, setUsingLiveData] = useState(false);
 
-  const fetchWBGT = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
       
-      const response = await fetch(
+      // Fetch WBGT data
+      const wbgtResponse = await fetch(
         'https://api-open.data.gov.sg/v2/real-time/api/weather?api=wbgt',
-        { 
-          method: 'GET',
-          headers: { 'Accept': 'application/json' }
-        }
+        { headers: { 'Accept': 'application/json' }}
       );
       
-      if (!response.ok) throw new Error('API request failed');
+      // Fetch air temperature data
+      const tempResponse = await fetch(
+        'https://api-open.data.gov.sg/v2/real-time/api/weather?api=air-temperature',
+        { headers: { 'Accept': 'application/json' }}
+      );
       
-      const result = await response.json();
+      if (!wbgtResponse.ok || !tempResponse.ok) {
+        throw new Error('API request failed');
+      }
       
-      if (result.code !== 0 || !result.data?.records?.[0]?.item?.readings) {
+      const wbgtResult = await wbgtResponse.json();
+      const tempResult = await tempResponse.json();
+      
+      if (wbgtResult.code !== 0 || tempResult.code !== 0) {
         throw new Error('Invalid API response');
       }
       
-      const readings = result.data.records[0].item.readings;
-      const timestamp = result.data.records[0].updatedTimestamp;
+      const wbgtReadings = wbgtResult.data.records[0].item.readings;
+      const tempReadings = tempResult.data.records[0].item.readings;
+      const timestamp = wbgtResult.data.records[0].updatedTimestamp;
       
-      const stations = readings.map(r => ({
-        id: r.station.id,
-        name: r.station.name,
-        location: r.station.townCenter,
-        wbgt: parseFloat(r.wbgt),
-        heatStress: r.heatStress
-      }));
+      // Merge WBGT and temperature data by station ID
+      const stations = wbgtReadings.map(wbgt => {
+        const temp = tempReadings.find(t => t.station.id === wbgt.station.id);
+        return {
+          id: wbgt.station.id,
+          name: wbgt.station.name,
+          location: wbgt.station.townCenter || wbgt.station.name,
+          wbgt: parseFloat(wbgt.wbgt),
+          heatStress: wbgt.heatStress,
+          temperature: temp ? parseFloat(temp.value) : null
+        };
+      });
       
       setAllStations(stations);
       setUsingLiveData(true);
@@ -72,6 +85,7 @@ export function useWBGTData() {
       setData({
         station: station,
         wbgt: station.wbgt,
+        temperature: station.temperature,
         heatStress: station.heatStress,
         timestamp: timestamp,
         allStations: stations,
@@ -87,6 +101,7 @@ export function useWBGTData() {
       setData({
         station: station,
         wbgt: station.wbgt,
+        temperature: station.temperature,
         heatStress: station.heatStress,
         timestamp: new Date().toISOString(),
         allStations: FALLBACK_STATIONS,
@@ -98,8 +113,8 @@ export function useWBGTData() {
   };
 
   useEffect(() => {
-    fetchWBGT();
-    const interval = setInterval(fetchWBGT, 15 * 60 * 1000);
+    fetchData();
+    const interval = setInterval(fetchData, 15 * 60 * 1000);
     return () => clearInterval(interval);
   }, [selectedStation]);
 
@@ -121,6 +136,6 @@ export function useWBGTData() {
     usingLiveData,
     setSelectedStation, 
     setManualValue,
-    refetch: fetchWBGT
+    refetch: fetchData
   };
 }
