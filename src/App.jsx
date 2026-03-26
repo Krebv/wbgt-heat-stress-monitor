@@ -9,7 +9,6 @@ import StationSelector from './components/StationSelector';
 import RiskDisplay from './components/RiskDisplay';
 import MeasuresPanel from './components/MeasuresPanel';
 import AlertBanner from './components/AlertBanner';
-import HistoricalLog from './components/HistoricalLog';
 import { CircularProgress, Alert } from '@mui/material';
 
 const darkTheme = createTheme({
@@ -77,12 +76,6 @@ function App() {
         <RiskDisplay level={riskLevel} value={data?.wbgt || 29} />
         
         <MeasuresPanel riskLevel={riskLevel} />
-        
-        <HistoricalLog 
-          currentWBGT={data?.wbgt}
-          currentStation={data?.station}
-          riskLevel={riskLevel}
-        />
       </Container>
     </ThemeProvider>
   );
