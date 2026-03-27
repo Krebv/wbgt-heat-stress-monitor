@@ -11,41 +11,23 @@ export function useWBGTData() {
     try {
       setLoading(true);
       
-      // Correct API endpoints for Singapore NEA
-      const wbgtResponse = await fetch(
-        'https://api.data.gov.sg/v1/environment/wet-bulb-globe-temperature',
-        { 
-          method: 'GET',
-          headers: { 'Accept': 'application/json' }
-        }
-      );
+      // Call your own API route (no CORS issues)
+      const response = await fetch('/api/weather');
       
-      const tempResponse = await fetch(
-        'https://api.data.gov.sg/v1/environment/air-temperature',
-        { 
-          method: 'GET',
-          headers: { 'Accept': 'application/json' }
-        }
-      );
-      
-      if (!wbgtResponse.ok || !tempResponse.ok) {
-        throw new Error(`API request failed: WBGT ${wbgtResponse.status}, Temp ${tempResponse.status}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch weather data');
       }
       
-      const wbgtResult = await wbgtResponse.json();
-      const tempResult = await tempResponse.json();
+      const result = await response.json();
       
-      // Get latest readings
-      const latestWBGT = wbgtResult.items[0];
-      const latestTemp = tempResult.items[0];
-      const timestamp = latestWBGT.timestamp;
+      const wbgtReadings = result.wbgt.items[0].readings;
+      const tempReadings = result.temperature.items[0].readings;
+      const timestamp = result.wbgt.items[0].timestamp;
+      const stationMetadata = result.wbgt.metadata.stations;
       
-      // Create station map from metadata
-      const stationMetadata = wbgtResult.metadata.stations;
-      
-      const stations = latestWBGT.readings.map(wbgt => {
+      const stations = wbgtReadings.map(wbgt => {
         const stationMeta = stationMetadata.find(s => s.id === wbgt.station_id);
-        const temp = latestTemp.readings.find(t => t.station_id === wbgt.station_id);
+        const temp = tempReadings.find(t => t.station_id === wbgt.station_id);
         
         return {
           id: wbgt.station_id,
@@ -74,7 +56,7 @@ export function useWBGTData() {
       });
       
     } catch (err) {
-      console.error('Live API failed:', err);
+      console.error('API failed:', err);
       setError(err.message);
       setData(null);
       setAllStations([]);
