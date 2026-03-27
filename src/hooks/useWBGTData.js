@@ -10,24 +10,52 @@ export function useWBGTData() {
   const fetchData = async () => {
     try {
       setLoading(true);
+      setError(null);
       
-      // Call your own API route (no CORS issues)
-      const response = await fetch('/api/weather');
+      console.log('Fetching from /api/weather...');
+      
+      const response = await fetch('/api/weather', {
+        cache: 'no-store'
+      });
+      
+      console.log('Response status:', response.status);
       
       if (!response.ok) {
-        throw new Error('Failed to fetch weather data');
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP ${response.status}`);
       }
       
       const result = await response.json();
+      console.log('API result:', result);
+      
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
+      // Check if data exists
+      if (!result.wbgt || !result.wbgt.items || result.wbgt.items.length === 0) {
+        throw new Error('No WBGT data available');
+      }
+
+      if (!result.temperature || !result.temperature.items || result.temperature.items.length === 0) {
+        throw new Error('No temperature data available');
+      }
       
       const wbgtReadings = result.wbgt.items[0].readings;
       const tempReadings = result.temperature.items[0].readings;
       const timestamp = result.wbgt.items[0].timestamp;
-      const stationMetadata = result.wbgt.metadata.stations;
+      const stationMetadata = result.wbgt.metadata?.stations || [];
+      
+      console.log('WBGT readings count:', wbgtReadings?.length);
+      console.log('Temp readings count:', tempReadings?.length);
+      
+      if (!wbgtReadings || wbgtReadings.length === 0) {
+        throw new Error('No station readings available');
+      }
       
       const stations = wbgtReadings.map(wbgt => {
         const stationMeta = stationMetadata.find(s => s.id === wbgt.station_id);
-        const temp = tempReadings.find(t => t.station_id === wbgt.station_id);
+        const temp = tempReadings?.find(t => t.station_id === wbgt.station_id);
         
         return {
           id: wbgt.station_id,
@@ -41,10 +69,16 @@ export function useWBGTData() {
         };
       });
       
-      setAllStations(stations);
-      setError(null);
+      console.log('Processed stations:', stations.length);
       
-      const station = stations.find(s => s.id === selectedStation) || stations[0];
+      setAllStations(stations);
+      
+      // Find selected station or default to first available
+      let station = stations.find(s => s.id === selectedStation);
+      if (!station) {
+        station = stations[0];
+        console.log('Selected station not found, using:', station.id);
+      }
       
       setData({
         station: station,
@@ -55,8 +89,10 @@ export function useWBGTData() {
         allStations: stations
       });
       
+      setError(null);
+      
     } catch (err) {
-      console.error('API failed:', err);
+      console.error('useWBGTData error:', err);
       setError(err.message);
       setData(null);
       setAllStations([]);
@@ -67,6 +103,8 @@ export function useWBGTData() {
 
   useEffect(() => {
     fetchData();
+    
+    // Refresh every 15 minutes
     const interval = setInterval(fetchData, 15 * 60 * 1000);
     return () => clearInterval(interval);
   }, [selectedStation]);
