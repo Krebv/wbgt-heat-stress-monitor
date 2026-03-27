@@ -4,15 +4,16 @@ export function useWBGTData() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedStation, setSelectedStation] = useState('S125');
+  const [selectedStation, setSelectedStation] = useState('S24');
   const [allStations, setAllStations] = useState([]);
 
   const fetchData = async () => {
     try {
       setLoading(true);
       
+      // Correct API endpoints for Singapore NEA
       const wbgtResponse = await fetch(
-        'https://api-open.data.gov.sg/v2/real-time/api/weather?api=wbgt',
+        'https://api.data.gov.sg/v1/environment/wet-bulb-globe-temperature',
         { 
           method: 'GET',
           headers: { 'Accept': 'application/json' }
@@ -20,7 +21,7 @@ export function useWBGTData() {
       );
       
       const tempResponse = await fetch(
-        'https://api-open.data.gov.sg/v2/real-time/api/weather?api=air-temperature',
+        'https://api.data.gov.sg/v1/environment/air-temperature',
         { 
           method: 'GET',
           headers: { 'Accept': 'application/json' }
@@ -28,28 +29,32 @@ export function useWBGTData() {
       );
       
       if (!wbgtResponse.ok || !tempResponse.ok) {
-        throw new Error('API request failed');
+        throw new Error(`API request failed: WBGT ${wbgtResponse.status}, Temp ${tempResponse.status}`);
       }
       
       const wbgtResult = await wbgtResponse.json();
       const tempResult = await tempResponse.json();
       
-      if (wbgtResult.code !== 0 || tempResult.code !== 0) {
-        throw new Error('Invalid API response');
-      }
+      // Get latest readings
+      const latestWBGT = wbgtResult.items[0];
+      const latestTemp = tempResult.items[0];
+      const timestamp = latestWBGT.timestamp;
       
-      const wbgtReadings = wbgtResult.data.records[0].item.readings;
-      const tempReadings = tempResult.data.records[0].item.readings;
-      const timestamp = wbgtResult.data.records[0].updatedTimestamp;
+      // Create station map from metadata
+      const stationMetadata = wbgtResult.metadata.stations;
       
-      const stations = wbgtReadings.map(wbgt => {
-        const temp = tempReadings.find(t => t.station.id === wbgt.station.id);
+      const stations = latestWBGT.readings.map(wbgt => {
+        const stationMeta = stationMetadata.find(s => s.id === wbgt.station_id);
+        const temp = latestTemp.readings.find(t => t.station_id === wbgt.station_id);
+        
         return {
-          id: wbgt.station.id,
-          name: wbgt.station.name,
-          location: wbgt.station.townCenter || wbgt.station.name,
-          wbgt: parseFloat(wbgt.wbgt),
-          heatStress: wbgt.heatStress,
+          id: wbgt.station_id,
+          name: stationMeta?.name || wbgt.station_id,
+          location: stationMeta?.name || wbgt.station_id,
+          latitude: stationMeta?.location?.latitude,
+          longitude: stationMeta?.location?.longitude,
+          wbgt: parseFloat(wbgt.value),
+          heatStress: wbgt.heat_stress_level,
           temperature: temp ? parseFloat(temp.value) : null
         };
       });
